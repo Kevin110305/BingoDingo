@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bingo-dark: #0f0d1a;
+  --color-bingo-card: #1a1730;
+  --color-bingo-cell: #252240;
+  --color-bingo-cell-hover: #302d50;
+  --color-bingo-marked: #7c3aed;
+  --color-bingo-marked-glow: #a78bfa;
+  --color-bingo-empty: #13112280;
+  --color-bingo-accent: #f59e0b;
+  --color-bingo-green: #10b981;
+  --color-bingo-red: #ef4444;
+  --font-family-display: 'Outfit', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+}
+
+body {
+  font-family: var(--font-family-body);
+  background: var(--color-bingo-dark);
+  color: white;
+  min-height: 100vh;
+  margin: 0;
+}
