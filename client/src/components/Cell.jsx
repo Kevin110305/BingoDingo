@@ -16,10 +16,9 @@ export default function Cell({ number }) {
         w-12 h-12 sm:w-14 sm:h-14 rounded-lg font-bold text-lg
         transition-all duration-200 ease-out cursor-pointer
         flex items-center justify-center select-none
-        ${
-          isMarked
-            ? 'bg-bingo-marked text-white shadow-[0_0_15px_var(--color-bingo-marked-glow)] scale-95'
-            : 'bg-bingo-cell text-white/80 hover:bg-bingo-cell-hover hover:scale-105'
+        ${isMarked
+          ? 'bg-bingo-marked text-white shadow-[0_0_15px_var(--color-bingo-marked-glow)] scale-95'
+          : 'bg-bingo-cell text-white/80 hover:bg-bingo-cell-hover hover:scale-105'
         }
       `}
     >
