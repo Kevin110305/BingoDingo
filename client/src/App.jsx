@@ -3,41 +3,60 @@ import BingoCard from './components/BingoCard'
 import { useSocket } from './hooks/useSocket'
 
 export default function App() {
-  const { isConnected } = useSocket()
+  const {
+    isConnected,
+    drawnNumbers,
+    carton,
+    estadoPartida,
+    premioResult,
+    lineaCantada,
+    registrarJugador,
+    cantarLinea,
+    cantarBingo,
+  } = useSocket()
+
   const [playerName, setPlayerName] = useState('')
   const [isRegistered, setIsRegistered] = useState(false)
-  const [drawnNumbers, setDrawnNumbers] = useState([])
+  const [hasCantado, setHasCantado] = useState(false)
+  const [mensajeResultado, setMensajeResultado] = useState(null)
+
+  const currentNumber = drawnNumbers.length > 0 ? drawnNumbers[0] : null
+  const pastNumbers = drawnNumbers.length > 1 ? drawnNumbers.slice(1) : []
+
+  const handleJoin = (e) => {
+    e.preventDefault()
+    if (playerName.trim() !== '') {
+      registrarJugador(playerName.trim())
+      setIsRegistered(true)
+    }
+  }
+
+  const handleCantarLinea = () => {
+    cantarLinea()
+    setHasCantado(true)
+  }
+
+  const handleCantarBingo = () => {
+    cantarBingo()
+    setHasCantado(true)
+  }
 
   useEffect(() => {
-    let intervalId;
-    if (isRegistered) {
-      const generateNumber = () => {
-        setDrawnNumbers((prev) => {
-          if (prev.length >= 100) return prev;
-
-          let newNum;
-          do {
-            newNum = Math.floor(Math.random() * 100);
-          } while (prev.includes(newNum));
-
-          return [newNum, ...prev];
-        });
-      };
-
-      generateNumber();
-      intervalId = setInterval(generateNumber, 10000);
+    if (premioResult) {
+      setMensajeResultado(premioResult)
+      if (!premioResult.valido) {
+        setHasCantado(false)
+        const timeout = setTimeout(() => setMensajeResultado(null), 4000)
+        return () => clearTimeout(timeout)
+      }
+    } else {
+      setMensajeResultado(null)
+      setHasCantado(false)
     }
-    return () => clearInterval(intervalId);
-  }, [isRegistered]);
+  }, [premioResult])
 
-  const currentNumber = drawnNumbers.length > 0 ? drawnNumbers[0] : null;
-  const pastNumbers = drawnNumbers.length > 1 ? drawnNumbers.slice(1) : [];
-  const handleJoin = (e) => {
-    e.preventDefault();
-    if (playerName.trim() !== '') {
-      setIsRegistered(true);
-    }
-  };
+  const lineaDeshabilitada = lineaCantada || estadoPartida !== 'jugando' || hasCantado
+  const bingoDeshabilitado = estadoPartida !== 'jugando' || hasCantado
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-bingo-dark via-[#1a1145] to-bingo-dark flex flex-col items-center px-4 py-8">
@@ -134,7 +153,37 @@ export default function App() {
               </div>
             )}
 
-            <BingoCard />
+            {mensajeResultado && (
+              <div className={`w-full mb-6 p-4 rounded-xl text-center font-bold text-lg border transition-all duration-300 ${
+                mensajeResultado.valido
+                  ? 'bg-bingo-green/20 border-bingo-green/30 text-bingo-green shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  : 'bg-bingo-red/20 border-bingo-red/30 text-bingo-red shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+              }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {mensajeResultado.valido
+                  ? `¡${mensajeResultado.nombreGanador} ha cantado ${mensajeResultado.tipo.toUpperCase()}! 🎉`
+                  : `Tu ${mensajeResultado.tipo} no es válido ❌`
+                }
+              </div>
+            )}
+
+            <div className="flex gap-4 mb-6 w-full">
+              <button
+                onClick={handleCantarLinea}
+                disabled={lineaDeshabilitada}
+                className="flex-1 bg-gradient-to-r from-bingo-marked to-purple-600 hover:from-purple-500 hover:to-purple-400 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:shadow-[0_0_25px_rgba(124,58,237,0.6)] transform hover:-translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-[0_0_15px_rgba(124,58,237,0.4)]"
+              >
+                CANTAR LÍNEA
+              </button>
+              <button
+                onClick={handleCantarBingo}
+                disabled={bingoDeshabilitado}
+                className="flex-1 bg-gradient-to-r from-bingo-accent to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] transform hover:-translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-[0_0_15px_rgba(245,158,11,0.4)]"
+              >
+                CANTAR BINGO
+              </button>
+            </div>
+
+            <BingoCard carton={carton} drawnNumbers={drawnNumbers} />
           </div>
         )}
       </main>

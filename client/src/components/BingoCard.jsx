@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
 import Cell from './Cell'
-import { generateCard } from '../utils/generateCard'
 
-export default function BingoCard() {
-  const card = useMemo(() => generateCard(), [])
+export default function BingoCard({ carton, drawnNumbers }) {
+  if (!carton) {
+    return null
+  }
 
   return (
     <div className="bg-bingo-card/80 backdrop-blur-md rounded-2xl p-4 sm:p-6 shadow-2xl border border-white/5">
@@ -24,10 +24,13 @@ export default function BingoCard() {
       </div>
 
       <div className="flex flex-col gap-2">
-        {card.map((row, rowIndex) => (
+        {carton.map((row, rowIndex) => (
           <div key={rowIndex} className="flex gap-2 justify-center">
             {row.map((number, colIndex) => (
-              <Cell key={`${rowIndex}-${colIndex}`} number={number} />
+              <Cell
+                key={`${rowIndex}-${colIndex}`}
+                number={number}
+              />
             ))}
           </div>
         ))}
