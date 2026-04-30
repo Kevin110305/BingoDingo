@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import BingoCard from './components/BingoCard'
+import PremioAlert from './components/PremioAlert'
 import { useSocket } from './hooks/useSocket'
 
 export default function App() {
@@ -10,15 +11,17 @@ export default function App() {
     estadoPartida,
     premioResult,
     lineaCantada,
+    verificandoPremio,
+    gameKey,
     registrarJugador,
     cantarLinea,
     cantarBingo,
+    cantarReinicio,
   } = useSocket()
 
   const [playerName, setPlayerName] = useState('')
   const [isRegistered, setIsRegistered] = useState(false)
   const [hasCantado, setHasCantado] = useState(false)
-  const [mensajeResultado, setMensajeResultado] = useState(null)
 
   const currentNumber = drawnNumbers.length > 0 ? drawnNumbers[0] : null
   const pastNumbers = drawnNumbers.length > 1 ? drawnNumbers.slice(1) : []
@@ -42,18 +45,16 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (premioResult) {
-      setMensajeResultado(premioResult)
-      if (!premioResult.valido) {
-        setHasCantado(false)
-        const timeout = setTimeout(() => setMensajeResultado(null), 4000)
-        return () => clearTimeout(timeout)
-      }
-    } else {
-      setMensajeResultado(null)
+    if (premioResult && !premioResult.valido) {
+      setHasCantado(false)
+    } else if (!premioResult) {
       setHasCantado(false)
     }
   }, [premioResult])
+
+  const handleDismissInvalido = useCallback(() => {
+    setHasCantado(false)
+  }, [])
 
   const lineaDeshabilitada = lineaCantada || estadoPartida !== 'jugando' || hasCantado
   const bingoDeshabilitado = estadoPartida !== 'jugando' || hasCantado
@@ -83,6 +84,11 @@ export default function App() {
       </div>
 
       <main className="w-full max-w-2xl flex flex-col flex-1 items-center justify-center">
+        <PremioAlert
+          verificandoPremio={verificandoPremio}
+          premioResult={premioResult}
+          onDismissInvalido={handleDismissInvalido}
+        />
         {!isRegistered ? (
           <div className="w-full max-w-sm bg-bingo-card/80 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl border border-white/5 transform transition-all">
             <h2 className="text-2xl font-bold text-center text-white mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -153,18 +159,6 @@ export default function App() {
               </div>
             )}
 
-            {mensajeResultado && (
-              <div className={`w-full mb-6 p-4 rounded-xl text-center font-bold text-lg border transition-all duration-300 ${
-                mensajeResultado.valido
-                  ? 'bg-bingo-green/20 border-bingo-green/30 text-bingo-green shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                  : 'bg-bingo-red/20 border-bingo-red/30 text-bingo-red shadow-[0_0_20px_rgba(239,68,68,0.3)]'
-              }`} style={{ fontFamily: 'Outfit, sans-serif' }}>
-                {mensajeResultado.valido
-                  ? `¡${mensajeResultado.nombreGanador} ha cantado ${mensajeResultado.tipo.toUpperCase()}! 🎉`
-                  : `Tu ${mensajeResultado.tipo} no es válido ❌`
-                }
-              </div>
-            )}
 
             <div className="flex gap-4 mb-6 w-full">
               <button
@@ -183,7 +177,16 @@ export default function App() {
               </button>
             </div>
 
-            <BingoCard carton={carton} drawnNumbers={drawnNumbers} />
+            {estadoPartida === 'finalizada' && (
+              <button
+                onClick={cantarReinicio}
+                className="w-full mb-6 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transform hover:-translate-y-0.5 transition-all cursor-pointer"
+              >
+                🔄 NUEVA PARTIDA
+              </button>
+            )}
+
+            <BingoCard key={gameKey} carton={carton} drawnNumbers={drawnNumbers} />
           </div>
         )}
       </main>

@@ -68,7 +68,7 @@ function iniciarSorteo() {
             clearInterval(partida.intervaloId);
             partida.intervaloId = null;
         }
-    }, 7000);
+    }, 3000);
 }
 
 inicializarBolsa();
@@ -110,6 +110,8 @@ io.on('connection', (socket) => {
             return;
         }
 
+        io.emit('verificandoPremio', { tipo: 'linea', nombreJugador: jugador.nombre });
+
         const esValido = verificarLinea(jugador.carton, partida.numerosExtraidos);
 
         if (esValido) {
@@ -136,10 +138,10 @@ io.on('connection', (socket) => {
                 }
             }, 5000);
         } else {
-            socket.emit('premioValidado', {
+            io.emit('premioValidado', {
                 valido: false,
                 tipo: 'linea',
-                nombreGanador: null,
+                nombreGanador: jugador.nombre,
             });
 
             console.log(jugador.nombre + ' canto linea incorrectamente');
@@ -155,6 +157,8 @@ io.on('connection', (socket) => {
         if (!jugador) {
             return;
         }
+
+        io.emit('verificandoPremio', { tipo: 'bingo', nombreJugador: jugador.nombre });
 
         const esValido = verificarBingo(jugador.carton, partida.numerosExtraidos);
 
@@ -173,14 +177,37 @@ io.on('connection', (socket) => {
 
             console.log(jugador.nombre + ' ha cantado BINGO correctamente');
         } else {
-            socket.emit('premioValidado', {
+            io.emit('premioValidado', {
                 valido: false,
                 tipo: 'bingo',
-                nombreGanador: null,
+                nombreGanador: jugador.nombre,
             });
 
             console.log(jugador.nombre + ' canto bingo incorrectamente');
         }
+    });
+
+    socket.on('reiniciarPartida', () => {
+        if (partida.intervaloId) {
+            clearInterval(partida.intervaloId);
+            partida.intervaloId = null;
+        }
+
+        partida.numerosExtraidos = [];
+        partida.lineaCantada = false;
+        partida.estado = 'jugando';
+
+        inicializarBolsa();
+
+        partida.jugadores.forEach((jugador, socketId) => {
+            jugador.carton = generarCarton();
+            io.to(socketId).emit('cartonAsignado', { carton: jugador.carton });
+        });
+
+        io.emit('partidaReiniciada', {});
+        iniciarSorteo();
+
+        console.log('Partida reiniciada');
     });
 
     socket.on('disconnect', () => {

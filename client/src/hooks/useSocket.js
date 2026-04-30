@@ -10,6 +10,8 @@ export function useSocket() {
   const [estadoPartida, setEstadoPartida] = useState('jugando')
   const [premioResult, setPremioResult] = useState(null)
   const [lineaCantada, setLineaCantada] = useState(false)
+  const [verificandoPremio, setVerificandoPremio] = useState(null)
+  const [gameKey, setGameKey] = useState(0)
 
   useEffect(() => {
     function handleConnect() {
@@ -33,7 +35,13 @@ export function useSocket() {
       setEstadoPartida(estado)
     }
 
+    function handleVerificandoPremio({ tipo, nombreJugador }) {
+      setVerificandoPremio({ tipo, nombreJugador })
+      setPremioResult(null)
+    }
+
     function handlePremioValidado(resultado) {
+      setVerificandoPremio(null)
       setPremioResult(resultado)
       if (resultado.valido && resultado.tipo === 'linea') {
         setEstadoPartida('pausada')
@@ -46,6 +54,16 @@ export function useSocket() {
     function handleReanudarPartida() {
       setEstadoPartida('jugando')
       setPremioResult(null)
+      setVerificandoPremio(null)
+    }
+
+    function handlePartidaReiniciada() {
+      setDrawnNumbers([])
+      setEstadoPartida('jugando')
+      setPremioResult(null)
+      setVerificandoPremio(null)
+      setLineaCantada(false)
+      setGameKey((prev) => prev + 1)
     }
 
     socket.on('connect', handleConnect)
@@ -53,8 +71,10 @@ export function useSocket() {
     socket.on('numeroExtraido', handleNumeroExtraido)
     socket.on('cartonAsignado', handleCartonAsignado)
     socket.on('estadoActual', handleEstadoActual)
+    socket.on('verificandoPremio', handleVerificandoPremio)
     socket.on('premioValidado', handlePremioValidado)
     socket.on('reanudarPartida', handleReanudarPartida)
+    socket.on('partidaReiniciada', handlePartidaReiniciada)
 
     return () => {
       socket.off('connect', handleConnect)
@@ -62,8 +82,10 @@ export function useSocket() {
       socket.off('numeroExtraido', handleNumeroExtraido)
       socket.off('cartonAsignado', handleCartonAsignado)
       socket.off('estadoActual', handleEstadoActual)
+      socket.off('verificandoPremio', handleVerificandoPremio)
       socket.off('premioValidado', handlePremioValidado)
       socket.off('reanudarPartida', handleReanudarPartida)
+      socket.off('partidaReiniciada', handlePartidaReiniciada)
     }
   }, [])
 
@@ -79,6 +101,10 @@ export function useSocket() {
     socket.emit('cantarBingo')
   }
 
+  function cantarReinicio() {
+    socket.emit('reiniciarPartida')
+  }
+
   return {
     socket,
     isConnected,
@@ -87,8 +113,11 @@ export function useSocket() {
     estadoPartida,
     premioResult,
     lineaCantada,
+    verificandoPremio,
+    gameKey,
     registrarJugador,
     cantarLinea,
     cantarBingo,
+    cantarReinicio,
   }
 }
