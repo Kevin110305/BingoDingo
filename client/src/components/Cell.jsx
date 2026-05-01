@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Cell({ number }) {
+export default function Cell({ number, onMarcar }) {
   const [isMarked, setIsMarked] = useState(false)
 
   if (number === null) {
@@ -9,9 +9,17 @@ export default function Cell({ number }) {
     )
   }
 
+  const handleClick = () => {
+    const nuevoEstado = !isMarked
+    setIsMarked(nuevoEstado)
+    if (onMarcar) {
+      onMarcar(number, nuevoEstado)
+    }
+  }
+
   return (
     <button
-      onClick={() => setIsMarked(!isMarked)}
+      onClick={handleClick}
       className={`
         w-12 h-12 sm:w-14 sm:h-14 rounded-lg font-bold text-lg
         transition-all duration-200 ease-out cursor-pointer

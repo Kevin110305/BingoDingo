@@ -12,6 +12,7 @@ export function useSocket() {
   const [lineaCantada, setLineaCantada] = useState(false)
   const [verificandoPremio, setVerificandoPremio] = useState(null)
   const [gameKey, setGameKey] = useState(0)
+  const [mensajesChat, setMensajesChat] = useState([])
 
   useEffect(() => {
     function handleConnect() {
@@ -63,7 +64,12 @@ export function useSocket() {
       setPremioResult(null)
       setVerificandoPremio(null)
       setLineaCantada(false)
+      setMensajesChat([])
       setGameKey((prev) => prev + 1)
+    }
+
+    function handleMensajeChat(mensaje) {
+      setMensajesChat((prev) => [...prev, mensaje])
     }
 
     socket.on('connect', handleConnect)
@@ -75,6 +81,7 @@ export function useSocket() {
     socket.on('premioValidado', handlePremioValidado)
     socket.on('reanudarPartida', handleReanudarPartida)
     socket.on('partidaReiniciada', handlePartidaReiniciada)
+    socket.on('mensajeChat', handleMensajeChat)
 
     return () => {
       socket.off('connect', handleConnect)
@@ -86,6 +93,7 @@ export function useSocket() {
       socket.off('premioValidado', handlePremioValidado)
       socket.off('reanudarPartida', handleReanudarPartida)
       socket.off('partidaReiniciada', handlePartidaReiniciada)
+      socket.off('mensajeChat', handleMensajeChat)
     }
   }, [])
 
@@ -99,6 +107,14 @@ export function useSocket() {
 
   function cantarBingo() {
     socket.emit('cantarBingo')
+  }
+
+  function marcarNumero(numero, marcado) {
+    socket.emit('marcarNumero', { numero, marcado })
+  }
+
+  function enviarMensaje(texto) {
+    socket.emit('mensajeChat', { texto })
   }
 
   function cantarReinicio() {
@@ -115,9 +131,12 @@ export function useSocket() {
     lineaCantada,
     verificandoPremio,
     gameKey,
+    mensajesChat,
     registrarJugador,
     cantarLinea,
     cantarBingo,
     cantarReinicio,
+    marcarNumero,
+    enviarMensaje,
   }
 }

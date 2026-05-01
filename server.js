@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
 
     socket.on('registrarJugador', ({ nombre }) => {
         const carton = generarCarton();
-        partida.jugadores.set(socket.id, { nombre, carton });
+        partida.jugadores.set(socket.id, { nombre, carton, numerosMarcados: [] });
 
         socket.emit('cartonAsignado', { carton });
         socket.emit('estadoActual', {
@@ -100,6 +100,19 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('marcarNumero', ({ numero, marcado }) => {
+        const jugador = partida.jugadores.get(socket.id);
+        if (!jugador) return;
+
+        if (marcado) {
+            if (!jugador.numerosMarcados.includes(numero)) {
+                jugador.numerosMarcados.push(numero);
+            }
+        } else {
+            jugador.numerosMarcados = jugador.numerosMarcados.filter((n) => n !== numero);
+        }
+    });
+
     socket.on('cantarLinea', () => {
         if (partida.estado === 'finalizada' || partida.lineaCantada) {
             return;
@@ -112,7 +125,7 @@ io.on('connection', (socket) => {
 
         io.emit('verificandoPremio', { tipo: 'linea', nombreJugador: jugador.nombre });
 
-        const esValido = verificarLinea(jugador.carton, partida.numerosExtraidos);
+        const esValido = verificarLinea(jugador.carton, partida.numerosExtraidos, jugador.numerosMarcados);
 
         if (esValido) {
             partida.lineaCantada = true;
@@ -160,7 +173,7 @@ io.on('connection', (socket) => {
 
         io.emit('verificandoPremio', { tipo: 'bingo', nombreJugador: jugador.nombre });
 
-        const esValido = verificarBingo(jugador.carton, partida.numerosExtraidos);
+        const esValido = verificarBingo(jugador.carton, partida.numerosExtraidos, jugador.numerosMarcados);
 
         if (esValido) {
             partida.estado = 'finalizada';
@@ -201,6 +214,7 @@ io.on('connection', (socket) => {
 
         partida.jugadores.forEach((jugador, socketId) => {
             jugador.carton = generarCarton();
+            jugador.numerosMarcados = [];
             io.to(socketId).emit('cartonAsignado', { carton: jugador.carton });
         });
 
@@ -208,6 +222,18 @@ io.on('connection', (socket) => {
         iniciarSorteo();
 
         console.log('Partida reiniciada');
+    });
+
+    socket.on('mensajeChat', ({ texto }) => {
+        const jugador = partida.jugadores.get(socket.id);
+        if (!jugador || !texto || texto.trim() === '') return;
+
+        const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        io.emit('mensajeChat', {
+            nombre: jugador.nombre,
+            texto: texto.trim().slice(0, 200),
+            hora,
+        });
     });
 
     socket.on('disconnect', () => {

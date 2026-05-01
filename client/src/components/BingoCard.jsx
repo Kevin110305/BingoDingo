@@ -1,6 +1,6 @@
 import Cell from './Cell'
 
-export default function BingoCard({ carton, drawnNumbers }) {
+export default function BingoCard({ carton, drawnNumbers, onMarcarNumero }) {
   if (!carton) {
     return null
   }
@@ -30,6 +30,7 @@ export default function BingoCard({ carton, drawnNumbers }) {
               <Cell
                 key={`${rowIndex}-${colIndex}`}
                 number={number}
+                onMarcar={onMarcarNumero}
               />
             ))}
           </div>
