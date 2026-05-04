@@ -21,6 +21,7 @@ export default function App() {
     cantarReinicio,
     marcarNumero,
     enviarMensaje,
+    clearPremioResult,
   } = useSocket()
 
   const [playerName, setPlayerName] = useState('')
@@ -58,7 +59,8 @@ export default function App() {
 
   const handleDismissInvalido = useCallback(() => {
     setHasCantado(false)
-  }, [])
+    clearPremioResult()
+  }, [clearPremioResult])
 
   const lineaDeshabilitada = lineaCantada || estadoPartida !== 'jugando' || hasCantado
   const bingoDeshabilitado = estadoPartida !== 'jugando' || hasCantado

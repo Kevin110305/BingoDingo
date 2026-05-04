@@ -8,8 +8,12 @@ export default function PremioAlert({ verificandoPremio, premioResult, onDismiss
   const nombre = premioResult?.nombreGanador || verificandoPremio?.nombreJugador
 
   useEffect(() => {
-    if (!premioResult || premioResult.valido) return
-    const timer = setTimeout(onDismissInvalido, 4000)
+    if (!premioResult) return
+    
+    if (premioResult.valido && premioResult.tipo === 'linea') return
+
+    const timeout = premioResult.valido && premioResult.tipo === 'bingo' ? 6000 : 4000
+    const timer = setTimeout(onDismissInvalido, timeout)
     return () => clearTimeout(timer)
   }, [premioResult, onDismissInvalido])
 

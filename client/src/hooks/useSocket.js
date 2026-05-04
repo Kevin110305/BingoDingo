@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { io } from 'socket.io-client'
 
 const socket = io()
@@ -121,6 +121,10 @@ export function useSocket() {
     socket.emit('reiniciarPartida')
   }
 
+  const clearPremioResult = useCallback(() => {
+    setPremioResult(null)
+  }, [])
+
   return {
     socket,
     isConnected,
@@ -138,5 +142,6 @@ export function useSocket() {
     cantarReinicio,
     marcarNumero,
     enviarMensaje,
+    clearPremioResult,
   }
 }
