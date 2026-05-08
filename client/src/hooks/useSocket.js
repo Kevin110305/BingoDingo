@@ -1,13 +1,22 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { io } from 'socket.io-client'
+
 
 const socket = io()
 
 export function useSocket() {
+
   const [isConnected, setIsConnected] = useState(socket.connected)
+
+
+  const [jugadoresEnSala, setJugadoresEnSala] = useState([])
+  const [mensajesSala, setMensajesSala] = useState([])
+  const [cuentaAtras, setCuentaAtras] = useState(null)
+  const cuentaAtrasRef = useRef(null)
+
   const [drawnNumbers, setDrawnNumbers] = useState([])
   const [carton, setCarton] = useState(null)
-  const [estadoPartida, setEstadoPartida] = useState('jugando')
+  const [estadoPartida, setEstadoPartida] = useState('esperando')
   const [premioResult, setPremioResult] = useState(null)
   const [lineaCantada, setLineaCantada] = useState(false)
   const [verificandoPremio, setVerificandoPremio] = useState(null)
@@ -15,13 +24,55 @@ export function useSocket() {
   const [mensajesChat, setMensajesChat] = useState([])
 
   useEffect(() => {
-    function handleConnect() {
-      setIsConnected(true)
+
+    function handleConnect() { setIsConnected(true) }
+    function handleDisconnect() { setIsConnected(false) }
+
+
+    function handleActualizarSala({ jugadores }) {
+      setJugadoresEnSala(jugadores)
     }
 
-    function handleDisconnect() {
-      setIsConnected(false)
+    function handleMensajeSala(mensaje) {
+      setMensajesSala((prev) => [...prev, mensaje])
     }
+
+    function handleIniciarCuentaAtras({ segundos }) {
+      setCuentaAtras(segundos)
+
+
+      let restantes = segundos - 1
+      if (cuentaAtrasRef.current) clearInterval(cuentaAtrasRef.current)
+      cuentaAtrasRef.current = setInterval(() => {
+        if (restantes <= 0) {
+          clearInterval(cuentaAtrasRef.current)
+          cuentaAtrasRef.current = null
+          setCuentaAtras(0)
+        } else {
+          setCuentaAtras(restantes)
+          restantes--
+        }
+      }, 1000)
+    }
+
+    function handleCancelarCuentaAtras() {
+      if (cuentaAtrasRef.current) {
+        clearInterval(cuentaAtrasRef.current)
+        cuentaAtrasRef.current = null
+      }
+      setCuentaAtras(null)
+    }
+
+    function handlePartidaIniciada() {
+      setCuentaAtras(null)
+      if (cuentaAtrasRef.current) {
+        clearInterval(cuentaAtrasRef.current)
+        cuentaAtrasRef.current = null
+      }
+      setEstadoPartida('jugando')
+      setMensajesSala([])
+    }
+
 
     function handleNumeroExtraido({ numerosExtraidos }) {
       setDrawnNumbers([...numerosExtraidos].reverse())
@@ -56,11 +107,12 @@ export function useSocket() {
       setEstadoPartida('jugando')
       setPremioResult(null)
       setVerificandoPremio(null)
+      setLineaCantada(false)
     }
 
     function handlePartidaReiniciada() {
       setDrawnNumbers([])
-      setEstadoPartida('jugando')
+      setEstadoPartida('esperando')
       setPremioResult(null)
       setVerificandoPremio(null)
       setLineaCantada(false)
@@ -72,8 +124,14 @@ export function useSocket() {
       setMensajesChat((prev) => [...prev, mensaje])
     }
 
+
     socket.on('connect', handleConnect)
     socket.on('disconnect', handleDisconnect)
+    socket.on('actualizarSala', handleActualizarSala)
+    socket.on('mensajeSala', handleMensajeSala)
+    socket.on('iniciarCuentaAtras', handleIniciarCuentaAtras)
+    socket.on('cancelarCuentaAtras', handleCancelarCuentaAtras)
+    socket.on('partidaIniciada', handlePartidaIniciada)
     socket.on('numeroExtraido', handleNumeroExtraido)
     socket.on('cartonAsignado', handleCartonAsignado)
     socket.on('estadoActual', handleEstadoActual)
@@ -86,6 +144,11 @@ export function useSocket() {
     return () => {
       socket.off('connect', handleConnect)
       socket.off('disconnect', handleDisconnect)
+      socket.off('actualizarSala', handleActualizarSala)
+      socket.off('mensajeSala', handleMensajeSala)
+      socket.off('iniciarCuentaAtras', handleIniciarCuentaAtras)
+      socket.off('cancelarCuentaAtras', handleCancelarCuentaAtras)
+      socket.off('partidaIniciada', handlePartidaIniciada)
       socket.off('numeroExtraido', handleNumeroExtraido)
       socket.off('cartonAsignado', handleCartonAsignado)
       socket.off('estadoActual', handleEstadoActual)
@@ -95,6 +158,14 @@ export function useSocket() {
       socket.off('partidaReiniciada', handlePartidaReiniciada)
       socket.off('mensajeChat', handleMensajeChat)
     }
+  }, [])
+
+  const unirseASala = useCallback((nombre) => {
+    socket.emit('unirseASalaEspera', { nombre })
+  }, [])
+
+  const enviarMensajeSala = useCallback((texto) => {
+    socket.emit('mensajeSala', { texto })
   }, [])
 
   function registrarJugador(nombre) {
@@ -128,6 +199,11 @@ export function useSocket() {
   return {
     socket,
     isConnected,
+    jugadoresEnSala,
+    mensajesSala,
+    cuentaAtras,
+    unirseASala,
+    enviarMensajeSala,
     drawnNumbers,
     carton,
     estadoPartida,
