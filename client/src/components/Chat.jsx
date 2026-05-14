@@ -17,7 +17,6 @@ export default function Chat({ mensajes, onEnviarMensaje, nombreJugador, titulo 
 
   return (
     <div className="flex flex-col h-full bg-bingo-card/80 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl overflow-hidden">
-      { }
       <div className="px-4 py-3 border-b border-white/5 flex items-center gap-2 shrink-0">
         <span className="w-2 h-2 rounded-full bg-bingo-green shadow-[0_0_6px_var(--color-bingo-green)]" />
         <h2
@@ -28,7 +27,6 @@ export default function Chat({ mensajes, onEnviarMensaje, nombreJugador, titulo 
         </h2>
       </div>
 
-      { }
       <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2 min-h-0">
         {mensajes.length === 0 && (
           <p className="text-center text-white/20 text-xs mt-4 select-none">
@@ -64,7 +62,6 @@ export default function Chat({ mensajes, onEnviarMensaje, nombreJugador, titulo 
         <div ref={endRef} />
       </div>
 
-      { }
       <form
         onSubmit={handleEnviar}
         className="px-3 py-3 border-t border-white/5 flex gap-2 shrink-0"
@@ -82,7 +79,7 @@ export default function Chat({ mensajes, onEnviarMensaje, nombreJugador, titulo 
           disabled={texto.trim() === ''}
           className="shrink-0 px-3 py-2 rounded-lg bg-gradient-to-br from-bingo-accent to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-sm shadow-[0_0_10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_18px_rgba(245,158,11,0.5)] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none"
         >
-          ➤
+          Enviar
         </button>
       </form>
     </div>

@@ -55,7 +55,6 @@ export default function LoginPage({ onLoginOk }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-bingo-dark via-[#1a1145] to-bingo-dark flex flex-col items-center justify-center px-4 py-8">
-      { }
       <div className="mb-10 text-center">
         <h1
           className="text-6xl sm:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-bingo-accent via-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-lg"
@@ -68,17 +67,15 @@ export default function LoginPage({ onLoginOk }) {
         </p>
       </div>
 
-      { }
       <div className="w-full max-w-sm">
-        { }
-        <div className="flex rounded-xl bg-white/5 border border-white/10 p-1 mb-6">
+          <div className="flex rounded-xl bg-white/5 border border-white/10 p-1 mb-6">
           {['login', 'registro'].map((tab) => (
             <button
               key={tab}
               onClick={() => { setModo(tab); setError('') }}
               className={`flex-1 py-2 rounded-lg text-sm font-bold tracking-wide transition-all ${modo === tab
-                  ? 'bg-gradient-to-r from-bingo-accent to-orange-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-                  : 'text-white/40 hover:text-white/70'
+                ? 'bg-gradient-to-r from-bingo-accent to-orange-500 text-white shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                : 'text-white/40 hover:text-white/70'
                 }`}
               style={{ fontFamily: 'Outfit, sans-serif' }}
             >
@@ -87,11 +84,9 @@ export default function LoginPage({ onLoginOk }) {
           ))}
         </div>
 
-        { }
-        <div className="bg-bingo-card/80 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl border border-white/5">
+          <div className="bg-bingo-card/80 backdrop-blur-md rounded-2xl p-6 md:p-8 shadow-2xl border border-white/5">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            { }
-            <div>
+                  <div>
               <label htmlFor="loginNombre" className="block text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5">
                 Nombre de usuario
               </label>
@@ -108,8 +103,7 @@ export default function LoginPage({ onLoginOk }) {
               />
             </div>
 
-            { }
-            <div>
+                  <div>
               <label htmlFor="loginPassword" className="block text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5">
                 Contraseña
               </label>
@@ -126,8 +120,7 @@ export default function LoginPage({ onLoginOk }) {
               />
             </div>
 
-            { }
-            {esRegistro && (
+                  {esRegistro && (
               <div>
                 <label htmlFor="loginConfirmar" className="block text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5">
                   Confirmar contraseña
@@ -145,16 +138,13 @@ export default function LoginPage({ onLoginOk }) {
               </div>
             )}
 
-            { }
-            {error && (
+                  {error && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-bingo-red/15 border border-bingo-red/30 text-bingo-red text-sm font-medium animate-in fade-in duration-200">
-                <span>⚠️</span>
                 <span>{error}</span>
               </div>
             )}
 
-            { }
-            <button
+                  <button
               id="loginSubmit"
               type="submit"
               disabled={cargando}
@@ -170,7 +160,7 @@ export default function LoginPage({ onLoginOk }) {
                   Procesando...
                 </>
               ) : (
-                esRegistro ? '🎉 CREAR CUENTA' : '🎮 ENTRAR AL JUEGO'
+                esRegistro ? 'CREAR CUENTA' : 'ENTRAR AL JUEGO'
               )}
             </button>
           </form>

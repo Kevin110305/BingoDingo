@@ -26,12 +26,10 @@ mongoose.connect(uriBaseDatos)
     .then(() => console.log('Conectado a la base de datos MongoDB'))
     .catch((error) => console.error('Error al conectar a MongoDB:', error));
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
 aplicacion.use(cors());
 aplicacion.use(express.json());
 aplicacion.use(express.static('public'));
 
-// ─── Endpoints REST de autenticación ─────────────────────────────────────────
 
 aplicacion.post('/api/registro', async (req, res) => {
     try {
@@ -98,26 +96,22 @@ aplicacion.post('/api/login', async (req, res) => {
     }
 });
 
-// ─── Estado global ────────────────────────────────────────────────────────────
 
-// Sala de espera: Map<socketId, { nombre }>
 const salaEspera = new Map();
 let cuentaAtrasActiva = false;
 let timeoutCuentaAtras = null;
 
-// Partida activa
 const partida = {
     jugadores: new Map(),
     numerosExtraidos: [],
     bolsa: [],
-    estado: 'esperando', // 'esperando' | 'jugando' | 'pausada' | 'finalizada'
+    estado: 'esperando',
     intervaloId: null,
     lineaCantada: false,
     ganadorLinea: null,
     inicioPartida: null,
 };
 
-// ─── Helpers bolsa ────────────────────────────────────────────────────────────
 
 function inicializarBolsa() {
     partida.bolsa = [];
@@ -171,7 +165,6 @@ function iniciarSorteo() {
     }, 3000);
 }
 
-// ─── Lógica sala de espera ────────────────────────────────────────────────────
 
 function obtenerListaSala() {
     return Array.from(salaEspera.values()).map((j) => j.nombre);
@@ -186,7 +179,6 @@ function iniciarPartidaDesdeEspera() {
     cuentaAtrasActiva = false;
     timeoutCuentaAtras = null;
 
-    // Mover jugadores de sala a partida
     inicializarBolsa();
     partida.numerosExtraidos = [];
     partida.lineaCantada = false;
@@ -236,25 +228,21 @@ function cancelarCuentaAtras() {
     }
 }
 
-// ─── Sockets ──────────────────────────────────────────────────────────────────
 
 io.on('connection', (socket) => {
     console.log('Conexión nueva: ' + socket.id);
 
-    // El cliente se une a la sala de espera tras autenticarse
     socket.on('unirseASalaEspera', ({ nombre }) => {
         salaEspera.set(socket.id, { nombre });
         emitirEstadoSala();
         comprobarInicioPartida();
         console.log(`${nombre} se unió a la sala de espera (${salaEspera.size} jugadores)`);
 
-        // Si la partida ya está en curso (reconexión tardía), enviar estado
         if (partida.estado === 'jugando' || partida.estado === 'pausada') {
             socket.emit('mensajeSistema', { texto: 'Hay una partida en curso. Espera a la próxima.' });
         }
     });
 
-    // Chat de la sala de espera
     socket.on('mensajeSala', ({ texto }) => {
         const jugador = salaEspera.get(socket.id);
         if (!jugador || !texto || texto.trim() === '') return;
@@ -266,11 +254,8 @@ io.on('connection', (socket) => {
         });
     });
 
-    // ── Eventos de partida (igual que antes) ─────────────────────────────────
 
     socket.on('registrarJugador', ({ nombre }) => {
-        // Compatibilidad: si alguien emite registrarJugador directamente
-        // lo tratamos como unirse a sala de espera
         if (!salaEspera.has(socket.id) && !partida.jugadores.has(socket.id)) {
             salaEspera.set(socket.id, { nombre });
             emitirEstadoSala();
@@ -309,7 +294,6 @@ io.on('connection', (socket) => {
             io.emit('premioValidado', { valido: true, tipo: 'linea', nombreGanador: jugador.nombre });
             console.log(jugador.nombre + ' ha cantado LINEA correctamente');
 
-            // Premiar con 150
             try {
                 const usuarioActualizado = await ModeloUsuario.findOneAndUpdate(
                     { nombre: jugador.nombre },
@@ -353,7 +337,6 @@ io.on('connection', (socket) => {
             io.emit('premioValidado', { valido: true, tipo: 'bingo', nombreGanador: jugador.nombre });
             console.log(jugador.nombre + ' ha cantado BINGO correctamente');
 
-            // Premiar con 300
             try {
                 const usuarioActualizado = await ModeloUsuario.findOneAndUpdate(
                     { nombre: jugador.nombre },
@@ -407,7 +390,6 @@ io.on('connection', (socket) => {
         partida.ganadorLinea = null;
         partida.inicioPartida = null;
 
-        // Devolver jugadores a sala de espera
         partida.jugadores.forEach((jugador, socketId) => {
             salaEspera.set(socketId, { nombre: jugador.nombre });
         });
@@ -454,7 +436,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// ─── Arranque ─────────────────────────────────────────────────────────────────
 
 servidor.listen(puerto, () => {
     console.log('Servidor escuchando en localhost:' + puerto);

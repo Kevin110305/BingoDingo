@@ -9,7 +9,7 @@ export default function PremioAlert({ verificandoPremio, premioResult, onDismiss
 
   useEffect(() => {
     if (!premioResult) return
-    
+
     if (premioResult.valido && premioResult.tipo === 'linea') return
 
     const timeout = premioResult.valido && premioResult.tipo === 'bingo' ? 6000 : 4000
@@ -23,12 +23,12 @@ export default function PremioAlert({ verificandoPremio, premioResult, onDismiss
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm animate-in fade-in duration-300">
       <div
         className={`relative w-full max-w-sm mx-4 rounded-3xl p-8 shadow-2xl border text-center animate-in zoom-in-95 duration-500 ${enVerificacion
-            ? 'bg-bingo-card/95 border-white/10'
-            : premioResult?.valido
-              ? premioResult.tipo === 'bingo'
-                ? 'bg-bingo-card/95 border-bingo-accent/50 shadow-[0_0_60px_rgba(245,158,11,0.25)]'
-                : 'bg-bingo-card/95 border-bingo-green/50 shadow-[0_0_60px_rgba(16,185,129,0.25)]'
-              : 'bg-bingo-card/95 border-bingo-red/50 shadow-[0_0_60px_rgba(239,68,68,0.25)]'
+          ? 'bg-bingo-card/95 border-white/10'
+          : premioResult?.valido
+            ? premioResult.tipo === 'bingo'
+              ? 'bg-bingo-card/95 border-bingo-accent/50 shadow-[0_0_60px_rgba(245,158,11,0.25)]'
+              : 'bg-bingo-card/95 border-bingo-green/50 shadow-[0_0_60px_rgba(16,185,129,0.25)]'
+            : 'bg-bingo-card/95 border-bingo-red/50 shadow-[0_0_60px_rgba(239,68,68,0.25)]'
           }`}
       >
         {enVerificacion ? (
@@ -50,7 +50,7 @@ function VerificandoContent({ tipo, nombre }) {
         <div className="absolute inset-0 rounded-full border-4 border-white/10" />
         <div className="absolute inset-0 rounded-full border-4 border-t-bingo-accent border-r-transparent border-b-transparent border-l-transparent animate-spin" />
         <div className="absolute inset-2 rounded-full bg-bingo-accent/10 flex items-center justify-center">
-          <span className="text-2xl">{tipo === 'BINGO' ? '🎰' : '🎯'}</span>
+          <span className="text-2xl">{tipo === 'BINGO' ? '' : ''}</span>
         </div>
       </div>
       <p className="text-white/40 text-xs tracking-widest uppercase mb-2 font-semibold">
@@ -76,7 +76,7 @@ function ValidoContent({ premioResult, nombre }) {
   return (
     <>
       {esBingo ? (
-        <div className="text-6xl mb-5 animate-in zoom-in-50 duration-700">🏆</div>
+        <div className="text-6xl mb-5 animate-in zoom-in-50 duration-700"></div>
       ) : (
         <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-bingo-green/20 border-4 border-bingo-green flex items-center justify-center animate-in zoom-in-50 duration-500">
           <span className="text-bingo-green text-4xl font-black">✓</span>
@@ -95,7 +95,7 @@ function ValidoContent({ premioResult, nombre }) {
       </h2>
       <p className={`text-base font-medium ${esBingo ? 'text-bingo-accent/80' : 'text-bingo-green/80'}`}>
         {esBingo
-          ? '¡Ha ganado la partida con BINGO! 🎉'
+          ? '¡Ha ganado la partida con BINGO!'
           : '¡Ha completado una línea! El juego continúa en breve...'}
       </p>
     </>

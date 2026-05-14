@@ -16,7 +16,6 @@ export default function MenuInicio({ playerName, playerSaldo, onPlay, onLogout }
       <div className="max-w-md w-full bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-3xl shadow-2xl text-center animate-in zoom-in duration-500">
         <div className="mb-6 flex justify-center">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-4xl shadow-lg shadow-orange-500/20">
-            👤
           </div>
         </div>
 
@@ -25,7 +24,7 @@ export default function MenuInicio({ playerName, playerSaldo, onPlay, onLogout }
         </h1>
 
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full mb-8">
-          <span className="text-green-400 font-bold">💰 Saldo:</span>
+          <span className="text-green-400 font-bold">Saldo:</span>
           <span className="text-white font-black text-xl">{playerSaldo.toLocaleString()} </span>
         </div>
 
@@ -34,7 +33,7 @@ export default function MenuInicio({ playerName, playerSaldo, onPlay, onLogout }
           className="group relative w-full py-4 px-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-2xl font-black rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_35px_rgba(245,158,11,0.6)] transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
         >
           <span className="relative z-10 flex items-center justify-center gap-3">
-            <span className="text-3xl">🎮</span> ¡JUGAR AHORA!
+            ¡JUGAR AHORA!
           </span>
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
         </button>
