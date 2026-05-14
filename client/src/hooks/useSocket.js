@@ -22,6 +22,7 @@ export function useSocket() {
   const [verificandoPremio, setVerificandoPremio] = useState(null)
   const [gameKey, setGameKey] = useState(0)
   const [mensajesChat, setMensajesChat] = useState([])
+  const [nuevoSaldo, setNuevoSaldo] = useState(null)
 
   useEffect(() => {
 
@@ -124,6 +125,10 @@ export function useSocket() {
       setMensajesChat((prev) => [...prev, mensaje])
     }
 
+    function handleActualizarSaldo({ saldo }) {
+      setNuevoSaldo(saldo)
+    }
+
 
     socket.on('connect', handleConnect)
     socket.on('disconnect', handleDisconnect)
@@ -140,6 +145,7 @@ export function useSocket() {
     socket.on('reanudarPartida', handleReanudarPartida)
     socket.on('partidaReiniciada', handlePartidaReiniciada)
     socket.on('mensajeChat', handleMensajeChat)
+    socket.on('actualizarSaldo', handleActualizarSaldo)
 
     return () => {
       socket.off('connect', handleConnect)
@@ -157,6 +163,7 @@ export function useSocket() {
       socket.off('reanudarPartida', handleReanudarPartida)
       socket.off('partidaReiniciada', handlePartidaReiniciada)
       socket.off('mensajeChat', handleMensajeChat)
+      socket.off('actualizarSaldo', handleActualizarSaldo)
     }
   }, [])
 
@@ -219,5 +226,6 @@ export function useSocket() {
     marcarNumero,
     enviarMensaje,
     clearPremioResult,
+    nuevoSaldo,
   }
 }

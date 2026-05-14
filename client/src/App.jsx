@@ -31,12 +31,24 @@ export default function App() {
     marcarNumero,
     enviarMensaje,
     clearPremioResult,
+    nuevoSaldo,
   } = useSocket()
 
   const [pantalla, setPantalla] = useState(PANTALLAS.LOGIN)
   const [playerName, setPlayerName] = useState('')
   const [playerSaldo, setPlayerSaldo] = useState(0)
   const [hasCantado, setHasCantado] = useState(false)
+
+  useEffect(() => {
+    if (nuevoSaldo !== null) {
+      setPlayerSaldo(nuevoSaldo)
+      try {
+        localStorage.setItem('bingo_saldo', nuevoSaldo)
+      } catch (e) {
+        console.error('Error al guardar saldo:', e)
+      }
+    }
+  }, [nuevoSaldo])
 
 
   useEffect(() => {

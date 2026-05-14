@@ -290,7 +290,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('cantarLinea', () => {
+    socket.on('cantarLinea', async () => {
         if (partida.estado === 'finalizada' || partida.lineaCantada) return;
         const jugador = partida.jugadores.get(socket.id);
         if (!jugador) return;
@@ -309,6 +309,20 @@ io.on('connection', (socket) => {
             io.emit('premioValidado', { valido: true, tipo: 'linea', nombreGanador: jugador.nombre });
             console.log(jugador.nombre + ' ha cantado LINEA correctamente');
 
+            // Premiar con 150
+            try {
+                const usuarioActualizado = await ModeloUsuario.findOneAndUpdate(
+                    { nombre: jugador.nombre },
+                    { $inc: { saldo: 150 } },
+                    { new: true }
+                );
+                if (usuarioActualizado) {
+                    io.to(socket.id).emit('actualizarSaldo', { saldo: usuarioActualizado.saldo });
+                }
+            } catch (err) {
+                console.error('Error al premiar línea:', err);
+            }
+
             setTimeout(() => {
                 if (partida.estado !== 'finalizada') {
                     partida.estado = 'jugando';
@@ -322,7 +336,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('cantarBingo', () => {
+    socket.on('cantarBingo', async () => {
         if (partida.estado === 'finalizada') return;
         const jugador = partida.jugadores.get(socket.id);
         if (!jugador) return;
@@ -338,6 +352,20 @@ io.on('connection', (socket) => {
             }
             io.emit('premioValidado', { valido: true, tipo: 'bingo', nombreGanador: jugador.nombre });
             console.log(jugador.nombre + ' ha cantado BINGO correctamente');
+
+            // Premiar con 300
+            try {
+                const usuarioActualizado = await ModeloUsuario.findOneAndUpdate(
+                    { nombre: jugador.nombre },
+                    { $inc: { saldo: 300 } },
+                    { new: true }
+                );
+                if (usuarioActualizado) {
+                    io.to(socket.id).emit('actualizarSaldo', { saldo: usuarioActualizado.saldo });
+                }
+            } catch (err) {
+                console.error('Error al premiar bingo:', err);
+            }
 
             const numeroJugadores = partida.jugadores.size;
             const nuevaPartida = new ModeloPartida({
