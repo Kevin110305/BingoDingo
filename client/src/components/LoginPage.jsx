@@ -41,7 +41,8 @@ export default function LoginPage({ onLoginOk }) {
 
       if (datos.ok) {
         localStorage.setItem('bingo_nombre', datos.nombre)
-        onLoginOk(datos.nombre)
+        localStorage.setItem('bingo_saldo', datos.saldo)
+        onLoginOk(datos.nombre, datos.saldo)
       } else {
         setError(datos.mensaje || 'Ha ocurrido un error.')
       }

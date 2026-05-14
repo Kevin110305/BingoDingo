@@ -4,9 +4,10 @@ import PremioAlert from './components/PremioAlert'
 import Chat from './components/Chat'
 import LoginPage from './components/LoginPage'
 import SalaEspera from './components/SalaEspera'
+import MenuInicio from './components/MenuInicio'
 import { useSocket } from './hooks/useSocket'
 
-const PANTALLAS = { LOGIN: 'login', ESPERA: 'espera', JUGANDO: 'jugando' }
+const PANTALLAS = { LOGIN: 'login', INICIO: 'inicio', ESPERA: 'espera', JUGANDO: 'jugando' }
 
 export default function App() {
   const {
@@ -34,15 +35,17 @@ export default function App() {
 
   const [pantalla, setPantalla] = useState(PANTALLAS.LOGIN)
   const [playerName, setPlayerName] = useState('')
+  const [playerSaldo, setPlayerSaldo] = useState(0)
   const [hasCantado, setHasCantado] = useState(false)
 
 
   useEffect(() => {
     const nombreGuardado = localStorage.getItem('bingo_nombre')
+    const saldoGuardado = localStorage.getItem('bingo_saldo')
     if (nombreGuardado) {
       setPlayerName(nombreGuardado)
-      setPantalla(PANTALLAS.ESPERA)
-      unirseASala(nombreGuardado)
+      if (saldoGuardado) setPlayerSaldo(Number(saldoGuardado))
+      setPantalla(PANTALLAS.INICIO)
     }
   }, [])
 
@@ -57,16 +60,23 @@ export default function App() {
     }
   }, [estadoPartida, pantalla])
 
-  function handleLoginOk(nombre) {
+  function handleLoginOk(nombre, saldo) {
     setPlayerName(nombre)
+    setPlayerSaldo(saldo)
+    setPantalla(PANTALLAS.INICIO)
+  }
+
+  function handleStartPlay() {
     setPantalla(PANTALLAS.ESPERA)
-    unirseASala(nombre)
+    unirseASala(playerName)
   }
 
   function handleCerrarSesion() {
     localStorage.removeItem('bingo_nombre')
+    localStorage.removeItem('bingo_saldo')
     setPantalla(PANTALLAS.LOGIN)
     setPlayerName('')
+    setPlayerSaldo(0)
   }
 
   const handleCantarLinea = () => {
@@ -100,6 +110,17 @@ export default function App() {
 
   if (pantalla === PANTALLAS.LOGIN) {
     return <LoginPage onLoginOk={handleLoginOk} />
+  }
+
+  if (pantalla === PANTALLAS.INICIO) {
+    return (
+      <MenuInicio
+        playerName={playerName}
+        playerSaldo={playerSaldo}
+        onPlay={handleStartPlay}
+        onLogout={handleCerrarSesion}
+      />
+    )
   }
 
   if (pantalla === PANTALLAS.ESPERA) {

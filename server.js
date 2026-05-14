@@ -61,7 +61,7 @@ aplicacion.post('/api/registro', async (req, res) => {
         await nuevoUsuario.save();
 
         console.log(`Nuevo usuario registrado: ${nombre.trim()}`);
-        res.status(201).json({ ok: true, nombre: nombre.trim() });
+        res.status(201).json({ ok: true, nombre: nombre.trim(), saldo: nuevoUsuario.saldo });
     } catch (error) {
         console.error('Error en /api/registro:', error.message);
         res.status(500).json({ ok: false, mensaje: `Error: ${error.message}` });
@@ -91,7 +91,7 @@ aplicacion.post('/api/login', async (req, res) => {
         }
 
         console.log(`Login correcto: ${nombre.trim()}`);
-        res.json({ ok: true, nombre: nombre.trim() });
+        res.json({ ok: true, nombre: nombre.trim(), saldo: usuario.saldo });
     } catch (error) {
         console.error('Error en /api/login:', error.message);
         res.status(500).json({ ok: false, mensaje: `Error: ${error.message}` });
