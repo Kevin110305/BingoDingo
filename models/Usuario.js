@@ -13,6 +13,10 @@ const esquemaUsuario = new mongoose.Schema({
         type: String,
         required: true,
     },
+    saldo: {
+        type: Number,
+        default: 5000,
+    },
     creadoEn: {
         type: Date,
         default: Date.now,

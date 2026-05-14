@@ -8,6 +8,7 @@ const { verificarLinea, verificarBingo } = require('./validacion');
 const { generarCarton } = require('./generarCarton');
 const ModeloPartida = require('./modeloPartida');
 const ModeloUsuario = require('./models/Usuario');
+const ModeloGanadorPartida = require('./models/GanadorPartida');
 
 const aplicacion = express();
 const servidor = http.createServer(aplicacion);
@@ -338,14 +339,27 @@ io.on('connection', (socket) => {
             io.emit('premioValidado', { valido: true, tipo: 'bingo', nombreGanador: jugador.nombre });
             console.log(jugador.nombre + ' ha cantado BINGO correctamente');
 
+            const numeroJugadores = partida.jugadores.size;
             const nuevaPartida = new ModeloPartida({
-                ganadorLinea: partida.ganadorLinea,
-                ganadorBingo: jugador.nombre,
-                numerosExtraidos: partida.numerosExtraidos,
-                duracionSegundos: Math.floor((Date.now() - partida.inicioPartida) / 1000),
+                numeroJugadores: numeroJugadores,
             });
             nuevaPartida.save()
-                .then(() => console.log('Partida guardada en la base de datos'))
+                .then(async (partidaGuardada) => {
+                    console.log('Partida guardada en la base de datos');
+                    if (partida.ganadorLinea) {
+                        await ModeloGanadorPartida.create({
+                            partidaId: partidaGuardada._id,
+                            tipo: 'linea',
+                            nombreJugador: partida.ganadorLinea
+                        });
+                    }
+                    await ModeloGanadorPartida.create({
+                        partidaId: partidaGuardada._id,
+                        tipo: 'bingo',
+                        nombreJugador: jugador.nombre
+                    });
+                    console.log('Ganadores guardados en la base de datos');
+                })
                 .catch((err) => console.error('Error al guardar la partida:', err));
         } else {
             io.emit('premioValidado', { valido: false, tipo: 'bingo', nombreGanador: jugador.nombre });
